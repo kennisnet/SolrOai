@@ -1,0 +1,37 @@
+<?php
+$solrurlbase = "http://solr.example.org:8080/solr/select/?fl=title,url,teaser,changed,uid,sector_intM,theme_stringM,category_intS&sort=changed%20desc";
+# query part is separate, because we need to add stuff to it runtime
+$solrurlq = "&q=type:tx_sazcontent_domain_model_article";
+# used for solr rows amount
+$pagesize = 50;
+$scriptpath = "";
+$identify = array(
+	"name" => "My Repository",
+	"email" => "support@example.org",
+	"datestamp" => "2012-08-15T09:46:40Z",
+	"deleted" => "no",
+	"granularity" => "YYYY-MM-DDThh:mm:ssZ" );
+# Prefixes based on XSLT Response Writers available
+# in this case, lom.xsl
+# the schema, and namespace are used in listMetadataFormats, and parsing the xml
+# the headerxpath is used to get identifier and datestamp info for the record headers
+# the recordpath is used to get the actual records
+# the testoutput is used when debug is set to true
+$metadataprefixes = array(
+	"lom" => array(
+		"schema" => "http://www.imsglobal.org/xsd/imsmd_v1p2 http://www.imsglobal.org/xsd/imsmd_v1p2p4.xsd",
+		"namespace" => "http://www.imsglobal.org/xsd/imsmd_v1p2",
+		"xslt" => "lom.xsl",
+		"headerxpath" => "/response/result/p:lom/p:general/p:catalogentry[p:catalog='schoolaanzet']/p:entry/p:langstring | /response/result/p:lom/p:lifecycle/p:contribute/p:date/p:datetime",
+		"recordpath" => "/response/result/p:lom",
+		"testoutput" => "test-outputlom.xml") );
+$errors = array(
+	"badVerb" => "Illegal OAI verb",
+	"badArgument" => "The request includes illegal arguments, is missing required arguments, includes a repeated argument, or values for arguments have an illegal syntax.",
+	"cannotDisseminateFormat" => "The metadata format identified by the value given for the metadataPrefix argument is not supported by the item or by the repository.",
+	"idDoesNotExist" => "The value of the identifier argument is unknown or illegal in this repository.",
+	"noRecordsMatch" => "The combination of the values of the from, until, set and metadataPrefix arguments results in an empty list.",
+	"badResumptionToken" => "The value of the resumptionToken argument is invalid.",
+	"noSetHierarchy" => "This repository does not support sets." );
+$debug = false;
+?>
