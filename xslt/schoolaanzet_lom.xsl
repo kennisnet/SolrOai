@@ -1,3 +1,7 @@
+<!--
+XSLT for default Solr XML output to NL-LOM XML.
+This is used in the Solr XSLT Response Writer
+-->
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -42,10 +46,13 @@
 					<xsl:with-param name="element" select="'lom:description'"/>
 					<xsl:with-param name="value" select="str[@name='teaser']"/>
 				</xsl:call-template>
-				<xsl:for-each select="arr[@name='theme_stringM']">
+				<xsl:call-template name="categoryMapper">
+					<xsl:with-param name="input" select="int[@name='category_intS']"/>
+				</xsl:call-template>
+				<xsl:for-each select="arr[@name='theme_stringM']/str/text()">
 					<xsl:call-template name="langstring">
-						<xsl:with-param name="element" select="'lom:keyword'"/>
-						<xsl:with-param name="value" select="."/>
+							<xsl:with-param name="element" select="'lom:keyword'"/>
+							<xsl:with-param name="value" select="."/>
 					</xsl:call-template>
 				</xsl:for-each>
 				<xsl:call-template name="vocabulary">
@@ -76,7 +83,7 @@
 			</xsl:element>
 			
 			<xsl:element name="lom:metametadata">
-				<xsl:element name="metadataschema">
+				<xsl:element name="metadatascheme">
 					<xsl:value-of select="'LOMv1.0'"/>
 				</xsl:element>
 			</xsl:element>
@@ -96,7 +103,7 @@
 					<xsl:with-param name="source" select="'http://purl.edustandaard.nl/vdex_learningresourcetype_czp_20060628.xml'"/>
 					<xsl:with-param name="value" select="'informatiebron'"/>
 				</xsl:call-template>
-				<xsl:for-each select="arr[@name='sector_intM']">
+				<xsl:for-each select="arr[@name='sector_intM']/int">
 					<xsl:call-template name="contextmapper">
 						<xsl:with-param name="input" select="."/>
 					</xsl:call-template>
@@ -136,7 +143,7 @@
 						<xsl:with-param name="element" select="'lom:source'"/>
 						<xsl:with-param name="value" select="'http://purl.edustandaard.nl/begrippenkader'"/>
 					</xsl:call-template>
-					<xsl:for-each select="arr[@name='sector_intM']">
+					<xsl:for-each select="arr[@name='sector_intM']/int">
 						<xsl:call-template name="educationallevelmapper">
 							<xsl:with-param name="input" select="."/>
 						</xsl:call-template>
@@ -144,6 +151,36 @@
 				</xsl:element>
 			</xsl:element>
 		</lom:lom>
+	</xsl:template>
+
+	<xsl:template name="categoryMapper">
+		<xsl:param name="input"/>
+		<xsl:choose>
+			<xsl:when test="$input='1'">
+				<xsl:call-template name="langstring">
+					<xsl:with-param name="element" select="'lom:keyword'"/>
+					<xsl:with-param name="value" select="'praktijkvoorbeelden'"/>
+				</xsl:call-template>
+			</xsl:when>
+			<xsl:when test="$input='2'">
+				<xsl:call-template name="langstring">
+					<xsl:with-param name="element" select="'lom:keyword'"/>
+					<xsl:with-param name="value" select="'instrumenten'"/>
+				</xsl:call-template>
+			</xsl:when>
+			<xsl:when test="$input='3'">
+				<xsl:call-template name="langstring">
+					<xsl:with-param name="element" select="'lom:keyword'"/>
+					<xsl:with-param name="value" select="'kennis'"/>
+				</xsl:call-template>
+			</xsl:when>
+			<xsl:when test="$input='4'">
+				<xsl:call-template name="langstring">
+					<xsl:with-param name="element" select="'lom:keyword'"/>
+					<xsl:with-param name="value" select="'aanpak'"/>
+				</xsl:call-template>
+			</xsl:when>
+		</xsl:choose>
 	</xsl:template>
 
 	<xsl:template name="contextmapper">
@@ -211,12 +248,11 @@
 			</xsl:when>
 		</xsl:choose>
 	</xsl:template>
-	
+
 	<xsl:template name="langstring">
 		<xsl:param name="element"/>
 		<xsl:param name="value"/>
 		<xsl:param name="lang" select="'nl'"/>
-
 		<xsl:element name="{$element}">
 			<xsl:element name="lom:langstring">
 				<xsl:attribute name="xml:lang">
@@ -231,7 +267,6 @@
 		<xsl:param name="element"/>
 		<xsl:param name="source"/>
 		<xsl:param name="value"/>
-
 		<xsl:element name="{$element}">
 			<xsl:call-template name="langstring">
 				<xsl:with-param name="element" select="'lom:source'"/>
