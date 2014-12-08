@@ -83,17 +83,17 @@ This is used in the Solr XSLT Response Writer
 			</xsl:element>
 			
 			<xsl:element name="lom:metametadata">
-				<xsl:element name="metadatascheme">
+				<xsl:element name="lom:metadatascheme">
 					<xsl:value-of select="'LOMv1.0'"/>
 				</xsl:element>
 			</xsl:element>
 			
 			<xsl:element name="lom:technical">
-				<xsl:element name="lom:location">
-					<xsl:value-of select="concat('http://www.schoolaanzet.nl/', str[@name='url'])"/>
-				</xsl:element>
 				<xsl:element name="lom:format">
 					<xsl:value-of select="'text/html'"/>
+				</xsl:element>
+				<xsl:element name="lom:location">
+					<xsl:value-of select="concat('http://www.schoolaanzet.nl/', str[@name='url'])"/>
 				</xsl:element>
 			</xsl:element>
 			
@@ -103,16 +103,16 @@ This is used in the Solr XSLT Response Writer
 					<xsl:with-param name="source" select="'http://purl.edustandaard.nl/vdex_learningresourcetype_czp_20060628.xml'"/>
 					<xsl:with-param name="value" select="'informatiebron'"/>
 				</xsl:call-template>
-				<xsl:for-each select="arr[@name='sector_intM']/int">
-					<xsl:call-template name="contextmapper">
-						<xsl:with-param name="input" select="."/>
-					</xsl:call-template>
-				</xsl:for-each>
 				<xsl:call-template name="vocabulary">
 					<xsl:with-param name="element" select="'lom:intendedenduserrole'"/>
 					<xsl:with-param name="source" select="'LOMv1.0'"/>
 					<xsl:with-param name="value" select="'teacher'"/>
 				</xsl:call-template>
+				<xsl:for-each select="arr[@name='sector_intM']/int">
+					<xsl:call-template name="contextmapper">
+						<xsl:with-param name="input" select="."/>
+					</xsl:call-template>
+				</xsl:for-each>
 			</xsl:element>
 			
 			<xsl:element name="lom:rights">
