@@ -94,13 +94,28 @@ class SolrOai {
 				}
 			}
 			
+			# handle two types of from request, always send out a long request to solr
 			if ( array_key_exists( "from", $_GET ) ) {
-				$datetime = date_parse_from_format( "Y-m-d\TH:i:s\Z", $_GET["from"] );
-				if ( $datetime["warning_count"] > 0 || $datetime["error_count"] > 0 ) {
-					$this->error("badArgument");
+				if ( strlen( $_GET["from"] ) == 10 ) {
+					$datetime = date_parse_from_format( "Y-m-d", $_GET["from"] );
+					if ( $datetime["warning_count"] > 0 || $datetime["error_count"] > 0 ) {
+						$this->error("badArgument");
+					}
+					else {
+						$this->from = $_GET["from"]."T00:00:00Z";
+					}
+				}
+				elseif ( strlen( $_GET["from"] ) == 20 ) {
+					$datetime = date_parse_from_format( "Y-m-d\TH:i:s\Z", $_GET["from"] );
+					if ( $datetime["warning_count"] > 0 || $datetime["error_count"] > 0 ) {
+						$this->error("badArgument");
+					}
+					else {
+						$this->from = $_GET["from"];
+					}
 				}
 				else {
-					$this->from = $_GET["from"];
+					$this->error("badArgument");
 				}
 			}
 			
