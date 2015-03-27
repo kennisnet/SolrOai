@@ -6,13 +6,12 @@
  * XSLT Response Writer in combination with the metadataPRefix to retrieve
  * the records in the correct format.
  *
- * @version 0.1
+ * @version 0.2
  *
  * This class does not support sets.
- * @todo Support for getIdentifier.
  * 
  *
- * Copyright 2014 Wim Muskee <wimmuskee@gmail.com>
+ * Copyright 2014-2015 Wim Muskee <wimmuskee@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +34,7 @@ class SolrOai {
 	private $metadataprefix = "";
 	private $from = "";
 	private $fromts = "";
+	private $identifier = "";
 
 	# config
 	private $scriptpath = "";
@@ -119,6 +119,10 @@ class SolrOai {
 				}
 			}
 			
+			if ( array_key_exists( "identifier", $_GET ) ) {
+				$this->identifier = $_GET["identifier"];
+			}
+			
 			if ( array_key_exists( "set", $_GET ) ) {
 				$this->error("noSetHierarchy");
 			}
@@ -128,6 +132,7 @@ class SolrOai {
 			case "Identify": $this->Identify(); break;
 			case "ListRecords": $this->ListRecords(); break;
 			case "ListIdentifiers": $this->ListIdentifiers(); break;
+			case "GetRecord": $this->GetRecord(); break;
 			case "ListMetadataFormats": $this->ListMetadataFormats(); break;
 			case "ListSets": $this->ListSets(); break;
 			default:
@@ -226,6 +231,57 @@ class SolrOai {
 		}
 		$this->setResumptionToken();
 		echo "</oai:ListIdentifiers>";
+		$this->oaiFooter();
+	}
+	
+	private function GetRecord() {
+		if ( empty( $this->metadataprefix ) ) {
+			$this->error("badArgument");
+		}
+		
+		# lookup specific identifier
+		if ( empty( $this->identifier ) ) {
+			$this->error("badArgument");
+		}
+		else {
+			$this->solrurl = $this->solrurl."%20+%20uid:".$this->identifier;
+		}
+		
+		# set correct xslt from metadataprefix
+		$this->solrurl = $this->solrurl."&wt=xslt&tr=".$this->metadataprefixes[$this->metadataprefix]["xslt"];
+
+		$this->setXml();
+		$this->setResponseData();
+		
+		if ( $this->recordcount == 0 ) {
+			$this->error("idDoesNotExist");
+		}
+
+		$header = $this->getRecordHeaderData();
+		$record_identifier = $header[0][0];
+		$record_datestamp = $header[0][1];
+		
+		# check to make sure response identifier is the same as the request one
+		# Solr seems to return all identifiers when the request one does not exist
+		if ( $record_identifier != $this->identifier ) {
+			$this->error("idDoesNotExist");
+		}
+		
+		# print response
+		$this->oaiHeader();
+		echo "<oai:GetRecord>";
+		echo "<oai:record>";
+		echo "<oai:header>";
+		echo "<oai:identifier>".$record_identifier."</oai:identifier>";
+		echo "<oai:datestamp>".$record_datestamp."</oai:datestamp>";
+		echo "</oai:header>";
+		echo "<oai:metadata>";
+		$data = $this->xml->xpath($this->metadataprefixes[$this->metadataprefix]["recordpath"]);
+		echo $data[0]->asXML();
+		echo "</oai:metadata>";
+		echo "</oai:record>";
+		$this->setResumptionToken();
+		echo "</oai:GetRecord>";
 		$this->oaiFooter();
 	}
 	
